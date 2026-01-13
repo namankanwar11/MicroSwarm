@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MICRO-SWARM // RESEARCH INTERFACE</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --panel: rgba(20, 20, 25, 0.7);
+            --border: #333;
+            --accent: #00f0ff; /* Neon Cyan */
+            --success: #00ff41; /* Hacker Green */
+            --text: #c9d1d9;
+        }
+        body { background-color: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; padding: 0; margin: 0; height: 100vh; overflow: hidden; background-image: radial-gradient(circle at 50% 50%, #111 0%, #000 100%); }
+        
+        /* Layout */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            grid-template-rows: 60px 1fr;
+            gap: 15px;
+            height: 96vh;
+            padding: 2vh;
+        }
+
+        /* Header */
+        .header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--accent); padding-bottom: 10px; }
+        .brand { font-size: 1.5rem; font-weight: bold; color: var(--accent); letter-spacing: 2px; text-shadow: 0 0 10px var(--accent); }
+        .status-pill { background: #111; border: 1px solid var(--border); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: #555; box-shadow: 0 0 5px #555; }
+        .dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+
+        /* Panels */
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 20px; backdrop-filter: blur(10px); display: flex; flex-direction: column; overflow: hidden; }
+        .panel h2 { margin-top: 0; font-size: 0.9rem; color: #888; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
+
+        /* Left: Input */
+        select { background: #000; color: #fff; border: 1px solid #333; padding: 10px; border-radius: 4px; width: 100%; margin-bottom: 10px; font-family: inherit; }
+        textarea { flex-grow: 1; background: #000; border: 1px solid #333; color: #fff; padding: 15px; font-family: inherit; resize: none; border-radius: 4px; outline: none; }
+        textarea:focus { border-color: var(--accent); }
+        
+        button { margin-top: 15px; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        button:hover { background: var(--accent); color: #000; box-shadow: 0 0 20px var(--accent); }
+        button:disabled { border-color: #555; color: #555; background: transparent; cursor: not-allowed; box-shadow: none; }
+
+        /* Mic Button specific */
+        #micBtn { width: 50px; margin-top: 0; display: flex; align-items: center; justify-content: center; border-color: #555; background: #111; }
+        #micBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Center: Terminal */
+        .terminal { font-size: 0.85rem; line-height: 1.5; color: #aaffaa; white-space: pre-wrap; overflow-y: auto; flex-grow: 1; }
+        .terminal::-webkit-scrollbar { width: 8px; }
+        .terminal::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+        /* Right: Visualization */
+        .viz-box { flex-grow: 1; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); border-radius: 4px; margin-bottom: 15px; border: 1px solid #222; }
+        
+        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .metric-item { background: #111; padding: 10px; border-radius: 4px; border: 1px solid #333; }
+        .metric-label { font-size: 0.7rem; color: #666; display: block; }
+        .metric-val { font-size: 1.1rem; color: #fff; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="grid-container">
+    <div class="header">
+        <div class="brand">MICRO-SWARM v1.0</div>
+        <div class="status-pill"><span id="connDot" class="dot"></span> <span id="connText">DISCONNECTED</span></div>
+    </div>
+
+    <div class="panel">
+        <h2>Mission Control</h2>
+        
+        <select id="langSelect">
+            <option value="C++">C++ (Systems)</option>
+            <option value="Python">Python (Data/AI)</option>
+            <option value="Java">Java (Enterprise)</option>
+            <option value="JavaScript">JavaScript (Web)</option>
+        </select>
+
+        <div style="display: flex; gap: 5px; height: 120px;">
+            <textarea id="taskInput" placeholder="> Enter instructions or use Voice..."></textarea>
+            <button id="micBtn" onclick="toggleVoice()" title="Voice Input">🎤</button>
+        </div>
+
+        <button id="runBtn" onclick="deploySwarm()">INITIALIZE SWARM</button>
+        
+        <div style="margin-top:auto; font-size: 0.7rem; color: #555;">
+            <p>ARCHITECT: Phi-3-Mini</p>
+            <p>CODER: Qwen-2.5-1.5B</p>
+            <p>QA LEAD: Phi-3-Mini</p>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>System Terminal</h2>
+        <div class="terminal" id="terminalOutput">
+            <span style="color:#555">// System Standby... Waiting for input.</span>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Swarm Telemetry</h2>
+        <div class="viz-box">
+            <div id="diagram" class="mermaid">
+                %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#111', 'edgeLabelBackground':'#111', 'tertiaryColor': '#111'}}}%%
+                graph TD
+                    Start((START)) --> A[ARCHITECT]
+                    A --> B[CODER]
+                    B --> C[QA REVIEW]
+                    C --> End((FINISH))
+                    
+                    style Start fill:#000,stroke:#555,stroke-width:2px
+                    style A fill:#000,stroke:#555,stroke-width:2px
+                    style B fill:#000,stroke:#555,stroke-width:2px
+                    style C fill:#000,stroke:#555,stroke-width:2px
+                    style End fill:#000,stroke:#555,stroke-width:2px
+            </div>
+        </div>
+
+        <div class="metric-grid">
+            <div class="metric-item">
+                <span class="metric-label">GEN TIME</span>
+                <span class="metric-val" id="m-gen">0.00s</span>
+            </div>
+            <div class="metric-item">
+                <span class="metric-label">SWITCH COST</span>
+                <span class="metric-val" id="m-switch">0.00s</span>
+            </div>
+            <div class="metric-item">
+                <span class="metric-label">THROUGHPUT</span>
+                <span class="metric-val" id="m-speed">0 T/s</span>
+            </div>
+            <div class="metric-item">
+                <span class="metric-label">TOKENS</span>
+                <span class="metric-val" id="m-tokens">0</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    mermaid.initialize({ startOnLoad: true });
+    let pollInterval;
+
+    // --- 1. STATUS CHECK ---
+    async function checkStatus() {
+        try {
+            const res = await fetch('http://localhost:8080/status');
+            if(res.ok) {
+                document.getElementById('connDot').classList.add('online');
+                document.getElementById('connText').innerText = "SYSTEM ONLINE";
+                document.getElementById('connText').style.color = "#00ff41";
+            }
+        } catch(e) {
+            document.getElementById('connDot').classList.remove('online');
+            document.getElementById('connText').innerText = "OFFLINE";
+            document.getElementById('connText').style.color = "#ff3333";
+        }
+    }
+    setInterval(checkStatus, 2000);
+    checkStatus();
+
+    // --- 2. LIVE VISUALIZATION (Fixed for Correct Nodes) ---
+    async function updateVisualization() {
+        try {
+            const res = await fetch('http://localhost:8080/agent_status');
+            const stage = parseInt(await res.text());
+            
+            // Generate Mermaid syntax based on active stage
+            // 1=Arch, 2=Coder, 3=QA
+            let colorA = stage === 1 ? "#00f0ff" : "#555";
+            let widthA = stage === 1 ? "4px" : "2px";
+            
+            let colorB = stage === 2 ? "#00f0ff" : "#555";
+            let widthB = stage === 2 ? "4px" : "2px";
+            
+            let colorC = stage === 3 ? "#00f0ff" : "#555";
+            let widthC = stage === 3 ? "4px" : "2px";
+
+            // THIS IS THE FIXED GRAPH DEFINITION YOU WANTED
+            const graphDefinition = `
+                %%{init: {'theme': 'dark'}}%%
+                graph TD
+                    Start((START)) --> A[ARCHITECT]
+                    A --> B[CODER]
+                    B --> C[QA REVIEW]
+                    C --> End((FINISH))
+
+                    style Start fill:#000,stroke:#555,stroke-width:2px
+                    style A fill:#000,stroke:${colorA},stroke-width:${widthA}
+                    style B fill:#000,stroke:${colorB},stroke-width:${widthB}
+                    style C fill:#000,stroke:${colorC},stroke-width:${widthC}
+                    style End fill:#000,stroke:#555,stroke-width:2px
+            `;
+            
+            // Re-render
+            const element = document.getElementById('diagram');
+            const { svg } = await mermaid.render('graphDiv', graphDefinition);
+            element.innerHTML = svg;
+
+        } catch(e) { console.log("Viz Error", e); }
+    }
+
+    // --- 3. VOICE RECOGNITION (Jarvis Mode) ---
+    let recognition;
+    let isListening = false;
+
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+
+        recognition.onstart = function() {
+            document.getElementById('micBtn').style.borderColor = "#00ff41";
+            document.getElementById('micBtn').style.boxShadow = "0 0 10px #00ff41";
+            document.getElementById('taskInput').placeholder = "Listening...";
+        };
+
+        recognition.onend = function() {
+            isListening = false;
+            document.getElementById('micBtn').style.borderColor = "#555";
+            document.getElementById('micBtn').style.boxShadow = "none";
+            document.getElementById('taskInput').placeholder = "> Enter instructions...";
+        };
+
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            document.getElementById('taskInput').value = transcript;
+        };
+    }
+
+    function toggleVoice() {
+        if (!recognition) {
+            alert("Voice not supported in this browser. Use Chrome/Edge.");
+            return;
+        }
+        if (isListening) {
+            recognition.stop();
+        } else {
+            recognition.start();
+            isListening = true;
+        }
+    }
+
+    // --- 4. MAIN DEPLOY FUNCTION ---
+    async function deploySwarm() {
+        const text = document.getElementById('taskInput').value;
+        const lang = document.getElementById('langSelect').value;
+        
+        if(!text) {
+            alert("Please enter a task!");
+            return;
+        }
+
+        // Combine for C++ Backend
+        const payload = lang + "|" + text;
+
+        const btn = document.getElementById('runBtn');
+        const term = document.getElementById('terminalOutput');
+        
+        btn.disabled = true;
+        btn.innerText = "SWARM RUNNING...";
+        term.innerHTML = "<span style='color:#00f0ff'>[SYSTEM] Initializing " + lang + " Swarm...</span><br>";
+
+        pollInterval = setInterval(updateVisualization, 500);
+
+        try {
+            const response = await fetch('http://localhost:8080/run_task', {
+                method: 'POST',
+                body: payload
+            });
+
+            if (!response.ok) throw new Error("Backend Error");
+
+            const text = await response.text();
+            
+            // Metrics
+            document.getElementById('m-gen').innerText = parseFloat(response.headers.get("X-Gen-Time")||0).toFixed(2) + "s";
+            document.getElementById('m-switch').innerText = parseFloat(response.headers.get("X-Switch-Time")||0).toFixed(2) + "s";
+            document.getElementById('m-speed').innerText = parseFloat(response.headers.get("X-Token-Speed")||0).toFixed(2) + " T/s";
+            document.getElementById('m-tokens').innerText = response.headers.get("X-Token-Count");
+
+            term.innerText = text; // Show Result
+            
+        } catch (e) {
+            term.innerHTML += `<br><span style='color:red'>[ERROR] Is MicroSwarm.exe running? ${e}</span>`;
+        }
+
+        clearInterval(pollInterval);
+        btn.disabled = false;
+        btn.innerText = "INITIALIZE SWARM";
+        updateVisualization(); 
+    }
+</script>
+
+</body>
+</html>

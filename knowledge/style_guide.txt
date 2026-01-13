@@ -1,0 +1,4 @@
+[COMPANY CODING RULES]
+1. Always use 'std::' prefix, never 'using namespace std;'.
+2. Variable names must be in snake_case (e.g., my_variable).
+3. Add a comment "// Micro-Swarm Generated" at the top of every file.

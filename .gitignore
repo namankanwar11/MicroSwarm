@@ -1,0 +1,69 @@
+# Ignore Build Files
+build/
+out/
+*.exe
+*.dll
+*.lib
+*.pdb
+*.ilk
+*.exp
+*.obj
+
+# Ignore VS Code & IDE settings
+.vscode/
+.idea/
+*.sln
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+
+# Ignore Large Models (IMPORTANT)
+models/*.gguf
+models/*.bin
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore heavy models
+models/*.gguf
+models/*.bin
+
+# Ignore build artifacts (we rebuild these)
+build/
+out/
+*.exe
+*.dll
+*.obj
+*.pdb
+
+# Ignore Build Folders (CRITICAL)
+build/
+out/
+bin/
+Release/
+Debug/
+x64/
+
+# Ignore Visual Studio & VS Code files
+.vscode/
+*.sln
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+*.tlog
+*.log
+*.idb
+*.pdb
+
+# Ignore Compiled Binaries
+*.exe
+*.dll
+*.lib
+*.obj
+*.exp
+*.recipe
+
+# Ignore Large Models
+models/*.gguf
+models/*.bin

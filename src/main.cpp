@@ -1,41 +1,77 @@
 #include "APIServer.h"
 #include "SwarmOrchestrator.h"
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <vector>
+
+// Helper to read file with multiple path checks
+std::string readFile(const std::string& filename) {
+    std::vector<std::string> paths = {
+        "../" + filename,
+        "../../" + filename,
+        filename
+    };
+
+    for (const auto& path : paths) {
+        std::ifstream f(path);
+        if (f.is_open()) {
+            std::stringstream buf;
+            buf << f.rdbuf();
+            std::cout << "[System] Loaded UI from: " << path << std::endl;
+            return buf.str();
+        }
+    }
+
+    std::cerr << "[Error] Could not find " << filename << std::endl;
+    return "<h1>Error: dashboard.html not found. Check server logs.</h1>";
+}
 
 int main(int argc, char** argv) {
     if (argc < 3) {
-        std::cerr << "Usage: " << argv[0] << " <general_model_path> <coder_model_path>" << std::endl;
+        std::cerr << "Usage: microswarm <model_planner> <model_coder>" << std::endl;
         return 1;
     }
 
-    std::string generalModelPath = argv[1];
-    std::string coderModelPath = argv[2];
-    
-    SwarmOrchestrator swarm;
+    SwarmOrchestrator orchestrator;
+
+    // ================= PLANNER =================
+    orchestrator.registerAgent("planner", { 
+        "Architect",
+        argv[1],
+        "You are a Senior System Architect. Analyze the user request and generate a numbered implementation plan. Be concise."
+    });
+
+    // ================= HACKER CODER =================
+    orchestrator.registerAgent("coder", { 
+        "Coder",
+        argv[2],
+        "You are an autonomous AI programming engine. "
+        "Your goal is to write EXECUTABLE, COMPLETE Python scripts. "
+        "DO NOT write comments. DO NOT write docstrings. DO NOT explain the code. "
+        "Start directly with imports or the main logic. "
+        "Ensure the code prints the final result to stdout so it can be verified."
+    });
+
+    APIServer server(8080);
+
+    server.post("/api/swarm", [&](const std::string& body) {
+        std::cout << "\n[API] Received Task: " << body << std::endl;
+        SwarmResult res = orchestrator.runIterativeTask(body);
+        return res.responseText;
+    });
+
+    server.get("/status", [&](const std::string&) {
+        return "{\"status\":\"online\"}";
+    });
+
+    server.get("/", [&](const std::string&) {
+        return readFile("dashboard.html");
+    });
 
     std::cout << "[Main] Initializing Heterogeneous Swarm..." << std::endl;
-
-    // --- 1. ARCHITECT ---
-    // Now fully language-agnostic
-    Agent planner("Architect", generalModelPath, 
-        "You are a Software Architect. Analyze the user's request. Output a numbered implementation plan.");
-
-    // --- 2. SENIOR DEV ---
-    // Polyglot developer instead of C++-only
-    Agent coder("Senior Dev", coderModelPath, 
-        "You are an expert Developer capable of writing code in C++, Python, Java, and JavaScript. Follow the plan exactly. Use best practices for the target language.");
-
-    // --- 3. QA LEAD ---
-    // Generic language-agnostic code reviewer
-    Agent reviewer("QA Engineer", generalModelPath, 
-        "You are a QA Lead. Review the code for syntax errors. If valid for the target language, say 'PASS'. Otherwise, list bugs.");
-
-    swarm.registerAgent("planner", planner);
-    swarm.registerAgent("coder", coder);
-    swarm.registerAgent("reviewer", reviewer);
-
-    APIServer api(&swarm);
-    api.start(8080);
+    server.start();
 
     return 0;
 }

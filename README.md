@@ -1,20 +1,132 @@
-# MicroSwarm: Autonomous AI Agent System (C++)
+# 🐝 MICRO-SWARM (v3.3 Omega)
 
-## Overview
-MicroSwarm is a high-performance C++ autonomous agent system that uses local LLMs (Phi-3, Qwen) to generate, optimize, and secure code. It features a cyberpunk 'Matrix-style' dashboard, self-healing genetic algorithms, and Red Team security auditing.
+> **Autonomous Heterogeneous AI Agent Swarm with Evolutionary Code Generation.** > *Built with C++ (Brain), Python (Limbs), and HTML5 (Face).*
 
-## Features
-* **Evolutionary Code Generation:** Uses genetic algorithms to breed better code.
-* **Red Team Security:** Automated vulnerability scanning (SQLi, RCE) for generated scripts.
-* **IoT Integration:** Controls physical devices via Edge-Cloud architecture.
-* **Cyberpunk Dashboard:** Real-time HTML5 interface with multiple themes (Hacker, Ninja, Dragon).
+![License](https://img.shields.io/badge/license-MIT-blue)
+![C++](https://img.shields.io/badge/C++-17-00599C?logo=c%2B%2B)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python)
+![Status](https://img.shields.io/badge/System-ONLINE-brightgreen)
 
-## Tech Stack
-* **Core:** C++ (llama.cpp)
-* **Models:** Phi-3-Mini, Qwen2.5-Coder
-* **Interface:** HTML5/JS (WebSocket communication)
+## 💀 Overview
 
-## Usage
-1. Clone the repo.
-2. Build using CMake.
-3. Run microswarm.exe with model paths.
+MicroSwarm is a local, privacy-focused AI agent system that runs on your CPU/GPU. Unlike standard chatbots, it uses a **Heterogeneous Swarm Architecture**:
+1.  **The Architect (Phi-3):** Plans, critiques, and organizes complex tasks.
+2.  **The Engineer (Qwen 2.5 Coder):** Writes high-performance code.
+3.  **Red Team Security:** Automatically audits generated code for vulnerabilities before execution.
+4.  **Netrunner:** Connects to the live internet to fetch real-time data.
+
+The system uses an **Evolutionary Genetic Algorithm** to spawn multiple code variants, test them in a sandbox, and evolve the best solution.
+
+---
+
+## ⚡ Key Features
+
+### 🧠 The Core (C++ Backend)
+* **Iterative Evolution:** Spawns multiple "species" of code solutions and selects the fittest based on unit tests.
+* **Multi-Agent Debate:** Agents critique each other's plans before writing a single line of code.
+* **Tool Forge:** The agent can write its own Python tools and save them to the `tools/` directory for future use.
+
+### 🌐 Netrunner Uplink (Live Internet)
+* Real-time web search capabilities using a robust Python bridge.
+* Filters results for relevance and strips HTML clutter.
+* **Privacy First:** Uses DuckDuckGo (No tracking).
+
+### 🖥️ Omega Dashboard (Frontend)
+* **Three Reality Themes:** Hacker (Matrix Green), Ninja (Monochrome), Dragon (Ember).
+* **Real-time Telemetry:** Live graphs showing Architect, Evolution, and QA timing.
+* **Voice Uplink:** Browser-based speech-to-text command input.
+
+---
+
+## 📂 Project Structure
+
+```text
+MicroSwarm/
+├── src/
+│   ├── main.cpp                # Server Entry Point
+│   ├── SwarmOrchestrator.cpp   # Core AI Logic & Evolution Loop
+│   ├── SwarmOrchestrator.h     # Headers
+│   ├── LLMEngine.cpp           # Llama.cpp Inference Wrapper
+│   └── Agent.h                 # Agent Struct Definitions
+├── tools/
+│   ├── search.py               # Netrunner Search Tool
+│   └── (Generated Tools)       # Tools created by the AI go here
+├── models/
+│   └── (Your .gguf models)     # Place models here (Ignored by Git)
+├── build/                      # CMake Build Artifacts
+├── dashboard.html              # The Omega Interface
+└── CMakeLists.txt              # Build Configuration
+
+🛠️ Installation & Build
+Prerequisites
+C++ Compiler: MSVC (Windows) or GCC/Clang (Linux/Mac).
+
+CMake: Version 3.10+.
+
+Python: 3.10+ (for tools).
+
+Git: To clone the repo.
+git clone [https://github.com/namankanwar11/MicroSwarm.git](https://github.com/namankanwar11/MicroSwarm.git)
+cd MicroSwarm
+
+2. Install Python Dependencies
+For the Netrunner tool to work:
+pip install -U duckduckgo_search
+
+Download Models
+Download these (or similar) GGUF models and place them in the models/ folder:
+
+Planner: Phi-3-mini-4k-instruct.Q4_K_M.gguf
+
+Coder: Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf
+
+Build the C++ Backend
+
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+
+🚀 Usage
+Run the Server:
+
+PowerShell
+
+# Windows Example
+# Windows Example
+.\Release\microswarm.exe ..\models\phi-3-mini-4k-instruct.Q4_K_M.gguf ..\models\qwen2.5-coder-1.5b-instruct-q4_k_m.gguf
+
+Open the Dashboard: Open your browser and navigate to: http://localhost:8080/dashboard.html
+
+Command Examples:
+
+"Write a Python script to scan for open ports."
+
+(Netrunner): "Search for the latest LangChain documentation."
+
+(Forge): "Create a tool named system_check.py that prints CPU info."
+
+🛡️ "Red Team" Security
+Every piece of code generated by the Swarm passes through a Red Team Audit. If the code contains dangerous patterns (e.g., uncontrolled file deletion, RCE vulnerabilities), the system will:
+
+Flag the vulnerability.
+
+Reject the code.
+
+Force the Coder agent to rewrite it securely.
+
+🤝 Contributing
+Contributions are welcome! Please fork the repository and submit a Pull Request.
+
+Fork the Project
+
+Create your Feature Branch (git checkout -b feature/AmazingFeature)
+
+Commit your Changes (git commit -m 'Add some AmazingFeature')
+
+Push to the Branch (git push origin feature/AmazingFeature)
+
+Open a Pull Request
+
+📜 License
+Distributed under the MIT License. See LICENSE for more information.
